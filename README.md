@@ -2,7 +2,7 @@ This repository installs Cilium v1.2.3 on K8S and solves a problem with the foll
 
 # Installation
 ```
-git clone git@github.com:jek-a/k8s-cilium-deployment.git
+git clone https://github.com/jek-a/k8s-cilium-deployment.git
 cd k8s-cilium-deployment
 kubeadm init <args>
 ```
