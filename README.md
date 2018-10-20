@@ -1,6 +1,6 @@
 This repository installs Cilium v1.2.3 on K8S and solves a problem with the following bug: https://github.com/cilium/cilium/issues/5941
 
-# Usage
+# Installation
 ```
 git clone git@github.com:jek-a/k8s-cilium-deployment.git
 cd k8s-cilium-deployment
