@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: kube-system
+  name: etcd-liveness-check
+  labels:
+    name: etcd-liveness-check
+data:
+  etcd-liveness-check.sh: |-
+    #!/usr/bin/env sh
+    NUM_DEAD_CILIUM_ETC=$(kubectl get po -n kube-system --selector=etcd_cluster=cilium-etcd | grep 'Completed' | wc -l)
+    sleep 30
+    while true; do
+      if [[ $NUM_DEAD_CILIUM_ETC == 3 ]]; then
+        echo 'The Etcd cluster dead'
+        echo 'Re-creating Etcd cluster'
+        kubectl delete -f /scripts/cilium-etcd-cluster.yaml
+        kubectl create -f /scripts/cilium-etcd-cluster.yaml
+      fi
+      sleep 5
+      NUM_DEAD_CILIUM_ETC=$(kubectl get po -n kube-system --selector=etcd_cluster=cilium-etcd | grep 'Completed' | wc -l)
+    done
+  cilium-etcd-cluster.yaml: |-
+    apiVersion: "etcd.database.coreos.com/v1beta2"
+    kind: "EtcdCluster"
+    metadata:
+      name: "cilium-etcd"
+      namespace: kube-system
+    spec:
+      size: 3
+      version: "3.2.22"
+      TLS:
+        static:
+          member:
+            peerSecret: cilium-etcd-peer-tls
+            serverSecret: cilium-etcd-server-tls
+          operatorSecret: cilium-etcd-client-tls
+      pod:
+        labels:
+          "io.cilium.fixed-identity": "kv-store" 
