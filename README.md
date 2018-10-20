@@ -1,13 +1,12 @@
 This repository installs Cilium v1.2.3 on K8S and solves a problem with the following bug: https://github.com/cilium/cilium/issues/5941
 
 # Usage
-1. Clone repository
-2. Run
 ```
+git clone git@github.com:jek-a/k8s-cilium-deployment.git
+cd k8s-cilium-deployment
 kubeadm init <args>
 ```
-3. cd k8s-cilium-deployment
-4. Run 'install.sh'. This script installs the following tools: **cfssl**, **cfssljson** in order to generate TLS certs for Etcd cluster. Also, if your system does not have **wget** it installs it as well.
+Run 'install.sh'. This script installs the following tools: **cfssl**, **cfssljson** in order to generate TLS certs for Etcd cluster. Also, if your system does not have **wget** it installs it as well.
 ```
 $ ./install.sh
 generating CA certs ===
