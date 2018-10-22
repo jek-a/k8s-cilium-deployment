@@ -9,7 +9,6 @@ data:
   etcd-liveness-check.sh: |-
     #!/usr/bin/env sh
     NUM_DEAD_CILIUM_ETC=$(kubectl get po -n kube-system --selector=etcd_cluster=cilium-etcd | grep 'Completed' | wc -l)
-    sleep 30
     while true; do
       if [[ $NUM_DEAD_CILIUM_ETC == 3 ]]; then
         echo 'The Etcd cluster dead'
