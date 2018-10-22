@@ -8,16 +8,38 @@ metadata:
 data:
   etcd-liveness-check.sh: |-
     #!/usr/bin/env sh
-    NUM_DEAD_CILIUM_ETC=$(kubectl get po -n kube-system --selector=etcd_cluster=cilium-etcd | grep 'Completed' | wc -l)
+
+    getDeadCiliumEtcd() {
+      NUM_DEAD_CILIUM_ETC=$(kubectl get po -n kube-system --selector=etcd_cluster=cilium-etcd 2>error| grep 'Completed' | wc -l)
+      echo $NUM_DEAD_CILIUM_ETC
+    }
+
+    # Check if resource not found
+    # if 'error' file is not an empty than we have an error
+    ciliumEtcdError() {
+      if test -s error; then
+        return 0
+      else
+        return 1
+      fi
+    }
+
+    echo 'The etcd cluster health check start. Interval 30 sec'
+    sleep 30
     while true; do
-      if [[ $NUM_DEAD_CILIUM_ETC == 3 ]]; then
+      getDeadCiliumEtcd &>/dev/null
+      if ciliumEtcdError; then
+        echo 'EtcdCluster resource not found. The EtcdCluster resource has been deleted'
+        echo 'Creating Etcd cluster'
+        kubectl create -f /scripts/cilium-etcd-cluster.yaml
+      fi
+      if [[ $(getDeadCiliumEtcd) -gt 0 ]]; then
         echo 'The Etcd cluster dead'
         echo 'Re-creating Etcd cluster'
         kubectl delete -f /scripts/cilium-etcd-cluster.yaml
         kubectl create -f /scripts/cilium-etcd-cluster.yaml
       fi
-      sleep 5
-      NUM_DEAD_CILIUM_ETC=$(kubectl get po -n kube-system --selector=etcd_cluster=cilium-etcd | grep 'Completed' | wc -l)
+      sleep 30
     done
   cilium-etcd-cluster.yaml: |-
     apiVersion: "etcd.database.coreos.com/v1beta2"

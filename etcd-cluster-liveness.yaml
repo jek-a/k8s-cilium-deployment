@@ -32,10 +32,10 @@ spec:
               fieldPath: metadata.name
         resources:
           requests:
-            memory: "20Mi"
+            memory: "10Mi"
             cpu: "100m"
           limits:
-            memory: "50Mi"
+            memory: "100Mi"
             cpu: "200m"
         volumeMounts:
         - mountPath: /scripts
