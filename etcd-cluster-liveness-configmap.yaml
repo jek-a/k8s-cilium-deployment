@@ -36,7 +36,11 @@ data:
       if [[ $(getDeadCiliumEtcd) -gt 0 ]]; then
         echo 'The Etcd cluster dead'
         echo 'Re-creating Etcd cluster'
+        kubectl delete -f /scripts/cilium-etcd-client-svc.yaml
+        kubectl delete -f /scripts/cilium-etcd-svc.yaml
         kubectl delete -f /scripts/cilium-etcd-cluster.yaml
+        kubectl create -f /scripts/cilium-etcd-client-svc.yaml
+        kubectl create -f /scripts/cilium-etcd-svc.yaml
         kubectl create -f /scripts/cilium-etcd-cluster.yaml
       fi
       sleep 30
@@ -59,3 +63,56 @@ data:
       pod:
         labels:
           "io.cilium.fixed-identity": "kv-store" 
+  cilium-etcd-client-svc.yaml: |-
+    apiVersion: v1
+    kind: Service
+    metadata:
+      annotations:
+        service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+      labels:
+        app: etcd
+        etcd_cluster: cilium-etcd
+      name: cilium-etcd-client
+      namespace: kube-system
+    spec:
+      ports:
+      - name: client
+        port: 2379
+        protocol: TCP
+        targetPort: 2379
+      selector:
+        app: etcd
+        etcd_cluster: cilium-etcd
+      sessionAffinity: None
+      type: ClusterIP
+    status:
+      loadBalancer: {}
+  cilium-etcd-svc.yaml: |-
+    apiVersion: v1
+    kind: Service
+    metadata:
+      annotations:
+        service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+      labels:
+        app: etcd
+        etcd_cluster: cilium-etcd
+      name: cilium-etcd
+      namespace: kube-system
+    spec:
+      clusterIP: None
+      ports:
+      - name: client
+        port: 2379
+        protocol: TCP
+        targetPort: 2379
+      - name: peer
+        port: 2380
+        protocol: TCP
+        targetPort: 2380
+      selector:
+        app: etcd
+        etcd_cluster: cilium-etcd
+      sessionAffinity: None
+      type: ClusterIP
+    status:
+      loadBalancer: {}
