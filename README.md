@@ -1,4 +1,6 @@
-This repository installs Cilium v1.2.3 on K8S and solves a problem with the following bug: https://github.com/cilium/cilium/issues/5941
+This repository installs Cilium v1.2.4 on K8S and solves a problem with the following bug: https://github.com/cilium/cilium/issues/5941
+
+The Cilium POD's port 9090 is available to provide metrics to Prometheus server
 
 # Installation
 ```
@@ -71,7 +73,7 @@ deployment.apps/etcd-cluster-liveness created
 kubeadm join --token <token> <master-ip>:<master-port> --discovery-token-ca-cert-hash sha256:<hash>
 ```
 
-In about 5 min you will get working K8S cluster with Cilium v1.2.3
+In about 5 min you will get working K8S cluster with Cilium v1.2.4
 
 Example with 25 worker nodes:
 ```
